@@ -1,26 +1,27 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Custom Breakpoint: 320px-374px (default/Mobile Small), 375px+ (xs/Mobile Large) */
+  --breakpoint-xs: 375px;
+
+  /* Professional Baby Store Color Palette */
+  --color-brand-primary: #e16b7c;      /* Soft Rose Coral - Main CTA & Highlights */
+  --color-brand-primary-dark: #c95264; /* Hover state */
+  --color-brand-secondary: #4ea89e;    /* Calm Mint Teal - Trust badges & Accents */
+  --color-brand-bg: #fffcfb;           /* Warm Ivory/Cream Background */
+  --color-brand-surface: #ffffff;      /* Card & Header Surface */
+  --color-brand-muted: #fdf2f4;        /* Soft Blush Tint for Sections/Badges */
+  --color-brand-text: #1e293b;         /* Slate 800 - High readability dark text */
+  --color-brand-subtext: #64748b;      /* Slate 500 - Secondary text */
+  --color-brand-border: #f1e4e7;       /* Subtle warm border */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html,
+  body {
+    background-color: var(--color-brand-bg);
+    color: var(--color-brand-text);
+    overflow-x: hidden;
+    scroll-behavior: smooth;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
