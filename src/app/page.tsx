@@ -1,78 +1,31 @@
+/* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
 import { ShieldCheck, Truck, HeartHandshake, Sparkles } from "lucide-react";
 import Container from "@/components/layout/Container";
 import ProductCard from "@/components/products/ProductCard";
-import { IProduct } from "@/models/Product";
+import { IProduct, Product } from "@/models/Product";
+import { connectDB } from "@/lib/mongodb";
 
-// MongoDB কানেক্ট করার আগ পর্যন্ত প্রিভিউ দেখার জন্য Sample Data
-const sampleProducts: IProduct[] = [
-  {
-    _id: "1",
-    name: "Organic Cotton Newborn Romper Set",
-    slug: "organic-cotton-newborn-romper",
-    category: "Newborn",
-    price: 950,
-    discountPrice: 790,
-    ageGroup: "0-6 Months",
-    image: "https://images.unsplash.com/photo-1522771930-78848d9293e8?w=600&q=80",
-    stock: 15,
-    isFeatured: true,
-    description: "100% breathable soft organic cotton romper.",
-  },
-  {
-    _id: "2",
-    name: "BPA-Free Anti-Colic Feeding Bottle",
-    slug: "bpa-free-feeding-bottle",
-    category: "Feeding",
-    price: 650,
-    ageGroup: "0-12 Months",
-    image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=600&q=80",
-    stock: 20,
-    isFeatured: true,
-    description: "Safe silicone nipple feeding bottle for babies.",
-  },
-  {
-    _id: "3",
-    name: "Soft Plush Bunny Cuddle Toy",
-    slug: "soft-plush-bunny-toy",
-    category: "Toys",
-    price: 850,
-    discountPrice: 720,
-    ageGroup: "3+ Months",
-    image: "https://images.unsplash.com/photo-1559454403-b8fb88521f11?w=600&q=80",
-    stock: 12,
-    isFeatured: true,
-    description: "Skin-friendly ultra-soft plush toy.",
-  },
-  {
-    _id: "4",
-    name: "Gentle Tear-Free Baby Lotion",
-    slug: "gentle-baby-lotion",
-    category: "Skincare",
-    price: 580,
-    ageGroup: "All Ages",
-    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80",
-    stock: 25,
-    isFeatured: true,
-    description: "Dermatologist-tested moisturizing lotion.",
-  },
-  {
-    _id: "5",
-    name: "Pastel Knit Baby Sweater & Booties",
-    slug: "pastel-knit-baby-sweater",
-    category: "Clothing",
-    price: 1250,
-    discountPrice: 1050,
-    ageGroup: "6-18 Months",
-    image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600&q=80",
-    stock: 8,
-    isFeatured: true,
-    description: "Warm, cozy, and lightweight baby knitwear.",
-  },
-];
+export const dynamic = "force-dynamic";
 
-export default function HomePage() {
+async function getFeaturedProducts(): Promise<IProduct[]> {
+  try {
+    await connectDB();
+    const docs = await Product.find({ isFeatured: true })
+      .limit(10)
+      .sort({ createdAt: -1 })
+      .lean();
+    return JSON.parse(JSON.stringify(docs));
+  } catch (error) {
+    console.error("Failed to load featured products:", error);
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const featuredProducts = await getFeaturedProducts();
+
   return (
     <div>
       {/* Hero Section */}
@@ -172,11 +125,28 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 xs:gap-4 lg:gap-5">
-            {sampleProducts.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
+          {featuredProducts.length === 0 ? (
+            <div className="text-center py-12 bg-brand-surface border border-brand-border rounded-2xl px-4">
+              <p className="text-sm font-semibold text-brand-text">
+                No featured products in MongoDB yet.
+              </p>
+              <p className="text-xs text-brand-subtext mt-1">
+                Add your first baby product from the admin panel to display it here.
+              </p>
+              <Link
+                href="/admin/products"
+                className="mt-4 inline-block bg-brand-primary hover:bg-brand-primary-dark text-white text-xs xs:text-sm font-semibold px-5 py-2.5 rounded-xl transition"
+              >
+                + Add Product
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 xs:gap-4 lg:gap-5">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          )}
         </Container>
       </section>
     </div>
